@@ -42,16 +42,12 @@ from cloud_soc_env import CloudSOCEnv, CloudState, SCENARIOS
 # Using Hugging Face Inference API for Qwen2.5-3B-Instruct
 API_BASE_URL = os.getenv("API_BASE_URL", "https://api-inference.huggingface.co/v1")
 MODEL_NAME = os.getenv("MODEL_NAME", "Qwen/Qwen2.5-3B-Instruct")
-HF_TOKEN = os.getenv("HF_TOKEN")
+HF_TOKEN = os.getenv("HF_TOKEN", "")
 
-# Validate required token per hackathon requirements
-if HF_TOKEN is None:
-    raise ValueError("HF_TOKEN environment variable is required")
-
-# Initialize OpenAI client with Hugging Face Inference API
+# Initialize OpenAI client (HF_TOKEN will be validated at runtime for actual API calls)
 client = OpenAI(
     base_url=API_BASE_URL,
-    api_key=HF_TOKEN
+    api_key=HF_TOKEN or "placeholder"  # Allow Space to start, validate at runtime
 )
 
 # Memory pressure settings (Mechanic #6)
@@ -180,6 +176,17 @@ def call_llm(messages: List[Dict[str, str]], temperature: float = 0.5, retry_cou
     Implements adaptive temperature: increases on retries for diversity.
     Returns the raw response content.
     """
+    
+    # Validate HF_TOKEN at runtime (required per hackathon guidelines)
+    if not HF_TOKEN:
+        error_msg = "HF_TOKEN environment variable is required for inference"
+        sys.stderr.write(f"[ERROR] {error_msg}\n")
+        sys.stderr.flush()
+        return json.dumps({
+            "thought": error_msg,
+            "tool": "aws.soc.get_alerts",
+            "args": {}
+        })
     
     # Adaptive temperature: increase slightly on retries to get different outputs
     # Lower baseline temp (0.5) for 3B model to be more deterministic
