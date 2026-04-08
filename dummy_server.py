@@ -8,10 +8,16 @@ class DummyServer(BaseHTTPRequestHandler):
         self.wfile.write(b"OK")
         
     def do_POST(self):
-        self.send_response(200)
-        self.send_header('Content-type', 'text/plain')
-        self.end_headers()
-        self.wfile.write(b"OK")
+        if self.path == '/reset':
+            self.send_response(200)
+            self.send_header('Content-type', 'application/json')
+            self.end_headers()
+            self.wfile.write(b'{"status": "ok"}')
+        else:
+            self.send_response(200)
+            self.send_header('Content-type', 'text/plain')
+            self.end_headers()
+            self.wfile.write(b"OK")
 
 if __name__ == '__main__':
     server = HTTPServer(('0.0.0.0', 7860), DummyServer)
