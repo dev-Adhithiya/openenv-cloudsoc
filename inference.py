@@ -42,13 +42,16 @@ from cloud_soc_env import CloudSOCEnv, CloudState, SCENARIOS
 # Using Hugging Face Inference API for Qwen2.5-3B-Instruct
 API_BASE_URL = os.getenv("API_BASE_URL", "https://api-inference.huggingface.co/v1")
 MODEL_NAME = os.getenv("MODEL_NAME", "Qwen/Qwen2.5-3B-Instruct")
-HF_TOKEN = os.getenv("HF_TOKEN", "")
+HF_TOKEN = os.getenv("HF_TOKEN")
+
+# Validate required token per hackathon requirements
+if HF_TOKEN is None:
+    raise ValueError("HF_TOKEN environment variable is required")
 
 # Initialize OpenAI client with Hugging Face Inference API
-# HF_TOKEN is optional - provide empty string if not set
 client = OpenAI(
     base_url=API_BASE_URL,
-    api_key=HF_TOKEN if HF_TOKEN else "not-needed"
+    api_key=HF_TOKEN
 )
 
 # Memory pressure settings (Mechanic #6)
