@@ -665,8 +665,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-    
-    print("====== Agent Run Complete. Keeping container alive for submission. ======")
-    # This prevents the Space from stopping, keeping it in the "Running" state
-    while True:
-        time.sleep(3600)

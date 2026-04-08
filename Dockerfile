@@ -14,11 +14,14 @@ COPY cloud_soc_env.py .
 COPY inference.py .
 COPY openenv.yaml .
 
+COPY dummy_server.py .
+
 # Environment variables (defaults)
 # Using HF's new router.huggingface.co endpoint
 ENV API_BASE_URL="https://router.huggingface.co/v1"
 ENV MODEL_NAME="Qwen/Qwen2.5-Coder-32B-Instruct"
 ENV HF_TOKEN=""
 
-# Run inference - default task is 'easy'
-CMD ["python", "inference.py", "--task", "easy"]
+# Run a dummy HTTP server to keep the Hugging Face Space in the "Running" state
+# The evaluation system will exec into this container to run inference.py
+CMD ["python", "dummy_server.py"]
