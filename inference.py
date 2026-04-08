@@ -13,9 +13,9 @@ Implements:
 - Adaptive temperature based on failures
 
 Environment Variables:
-- API_BASE_URL: LLM API endpoint (default: https://api.openai.com/v1)
-- MODEL_NAME: Model identifier (default: gpt-4.1-mini)
-- HF_TOKEN: Hugging Face API token (required)
+- API_BASE_URL: LLM API endpoint (default: Hugging Face Inference API)
+- MODEL_NAME: Model identifier (default: Qwen/Qwen2.5-3B-Instruct)
+- HF_TOKEN: Hugging Face API token (optional, used for rate limit increase)
 """
 
 import os
@@ -39,24 +39,24 @@ from cloud_soc_env import CloudSOCEnv, CloudState, SCENARIOS
 # =============================================================================
 
 # Environment variables with defaults
-API_BASE_URL = os.getenv("API_BASE_URL", "https://api.openai.com/v1")
-MODEL_NAME = os.getenv("MODEL_NAME", "gpt-4.1-mini")
-HF_TOKEN = os.getenv("HF_TOKEN")
+# Using Hugging Face Inference API for Qwen2.5-3B-Instruct
+API_BASE_URL = os.getenv("API_BASE_URL", "https://api-inference.huggingface.co/v1")
+MODEL_NAME = os.getenv("MODEL_NAME", "Qwen/Qwen2.5-3B-Instruct")
+HF_TOKEN = os.getenv("HF_TOKEN", "")
 
-# Validate required token
-if HF_TOKEN is None:
-    raise ValueError("HF_TOKEN environment variable is required")
-
-# Initialize OpenAI client
+# Initialize OpenAI client with Hugging Face Inference API
+# HF_TOKEN is optional - provide empty string if not set
 client = OpenAI(
     base_url=API_BASE_URL,
-    api_key=HF_TOKEN
+    api_key=HF_TOKEN if HF_TOKEN else "not-needed"
 )
 
 # Memory pressure settings (Mechanic #6)
-MAX_CONTEXT_TURNS = 6  # Keep only last N [Observation, Action] pairs
-MAX_RETRIES = 3  # Max retries for malformed LLM responses
+# Optimized for 2vCPU/8GB RAM - reduce context window
+MAX_CONTEXT_TURNS = 4  # Keep only last N [Observation, Action] pairs (reduced for 8GB RAM)
+MAX_RETRIES = 2  # Max retries for malformed LLM responses
 RETRY_DELAY = 0.5  # Seconds between retries
+MAX_TOKENS = 512  # Reduced from 1024 for 3B model on 8GB RAM
 
 
 class AgentState(Enum):
@@ -169,31 +169,36 @@ def emit_end(success: bool, steps: int, rewards: List[float]):
 # LLM INTERACTION
 # =============================================================================
 
-def call_llm(messages: List[Dict[str, str]], temperature: float = 0.7, retry_count: int = 0) -> str:
+def call_llm(messages: List[Dict[str, str]], temperature: float = 0.5, retry_count: int = 0) -> str:
     """
-    Call the LLM with given messages.
+    Call the LLM with given messages via Hugging Face Inference API.
     
+    Optimized for Qwen2.5-3B-Instruct on 2vCPU/8GB RAM.
     Implements adaptive temperature: increases on retries for diversity.
     Returns the raw response content.
     """
     
     # Adaptive temperature: increase slightly on retries to get different outputs
-    adaptive_temp = min(1.0, temperature + (retry_count * 0.1))
+    # Lower baseline temp (0.5) for 3B model to be more deterministic
+    adaptive_temp = min(0.9, temperature + (retry_count * 0.15))
     
     try:
         response = client.chat.completions.create(
             model=MODEL_NAME,
             messages=messages,
             temperature=adaptive_temp,
-            max_tokens=1024,
-            timeout=30.0  # Prevent hanging
+            max_tokens=MAX_TOKENS,  # Optimized for 8GB RAM
+            timeout=45.0  # Slightly longer timeout for smaller model
         )
         return response.choices[0].message.content or ""
     except Exception as e:
         error_type = type(e).__name__
-        # Return error as JSON so the parser can handle it gracefully
+        error_msg = str(e)[:100]
+        # Log error but still return valid JSON fallback
+        sys.stderr.write(f"[LLM_ERROR] {error_type}: {error_msg}\n")
+        sys.stderr.flush()
         return json.dumps({
-            "thought": f"LLM API error ({error_type}): {str(e)[:100]}",
+            "thought": f"LLM API error ({error_type}): {error_msg}",
             "tool": "aws.soc.get_alerts",
             "args": {}
         })
