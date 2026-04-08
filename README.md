@@ -49,6 +49,8 @@ A production-ready benchmark environment for evaluating LLM agents on cloud secu
 pip install -r requirements.txt
 ```
 
+**For detailed setup instructions, see [SETUP.md](SETUP.md)**
+
 ## Usage
 
 ### Single Task

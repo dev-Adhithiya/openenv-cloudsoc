@@ -50,6 +50,9 @@ client = OpenAI(
     api_key=HF_TOKEN or "placeholder"  # Allow Space to start, validate at runtime
 )
 
+# Flag to track if HF_TOKEN warning has been printed
+_hf_token_warning_printed = False
+
 # Memory pressure settings (Mechanic #6)
 # Optimized for 2vCPU/8GB RAM - reduce context window
 MAX_CONTEXT_TURNS = 4  # Keep only last N [Observation, Action] pairs (reduced for 8GB RAM)
@@ -177,13 +180,27 @@ def call_llm(messages: List[Dict[str, str]], temperature: float = 0.5, retry_cou
     Returns the raw response content.
     """
     
+    global _hf_token_warning_printed
+    
     # Validate HF_TOKEN at runtime (required per hackathon guidelines)
     if not HF_TOKEN:
-        error_msg = "HF_TOKEN environment variable is required for inference"
-        sys.stderr.write(f"[ERROR] {error_msg}\n")
-        sys.stderr.flush()
+        # Print setup instructions only once
+        if not _hf_token_warning_printed:
+            error_msg = (
+                "ERROR: HF_TOKEN environment variable is required for inference.\n"
+                "  Setup Instructions:\n"
+                "  1. Go to https://huggingface.co/settings/tokens\n"
+                "  2. Create a new API token (read access is sufficient)\n"
+                "  3. In the HF Space settings, add HF_TOKEN as a Secret\n"
+                "  4. Restart the Space\n"
+            )
+            print(error_msg, file=sys.stderr)
+            sys.stderr.flush()
+            _hf_token_warning_printed = True
+        
+        # Return error response instead of crashing
         return json.dumps({
-            "thought": error_msg,
+            "thought": "Cannot call LLM: HF_TOKEN not configured. See stderr for setup instructions.",
             "tool": "aws.soc.get_alerts",
             "args": {}
         })
