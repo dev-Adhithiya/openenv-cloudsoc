@@ -17,7 +17,7 @@ COPY openenv.yaml .
 # Environment variables (defaults)
 # Using HF's new router.huggingface.co endpoint
 ENV API_BASE_URL="https://router.huggingface.co/v1"
-ENV MODEL_NAME="Qwen/Qwen2.5-7B-Instruct"
+ENV MODEL_NAME="Qwen/Qwen2.5-Coder-32B-Instruct"
 ENV HF_TOKEN=""
 
 # Run inference - default task is 'easy'

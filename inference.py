@@ -14,7 +14,7 @@ Implements:
 
 Environment Variables:
 - API_BASE_URL: LLM API endpoint (default: Hugging Face Inference API)
-- MODEL_NAME: Model identifier (default: Qwen/Qwen2.5-7B-Instruct)
+- MODEL_NAME: Model identifier (default: Qwen/Qwen2.5-Coder-32B-Instruct)
 - HF_TOKEN: Hugging Face API token (optional, used for rate limit increase)
 """
 
@@ -41,7 +41,7 @@ from cloud_soc_env import CloudSOCEnv, CloudState, SCENARIOS
 # Environment variables with defaults
 # Using Hugging Face's new router.huggingface.co endpoint (drop-in replacement for old API)
 API_BASE_URL = os.getenv("API_BASE_URL", "https://router.huggingface.co/v1")
-MODEL_NAME = os.getenv("MODEL_NAME", "Qwen/Qwen2.5-7B-Instruct")
+MODEL_NAME = os.getenv("MODEL_NAME", "Qwen/Qwen2.5-Coder-32B-Instruct")
 HF_TOKEN = os.getenv("HF_TOKEN")
 
 # Validate HF_TOKEN is provided (required per hackathon guidelines)
