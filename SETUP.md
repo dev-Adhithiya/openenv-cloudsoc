@@ -4,7 +4,7 @@
 
 ### Prerequisites
 - Python 3.11+
-- Together AI API key (free, get one at https://www.together.ai - no credit card required)
+- Hugging Face API token (free, get one at https://huggingface.co/settings/tokens)
 
 ### Installation
 
@@ -13,9 +13,9 @@
 pip install -r requirements.txt
 
 # Set environment variables
-export API_BASE_URL="https://api.together.xyz/v1"
-export MODEL_NAME="meta-llama/Qwen2.5-3B-Instruct"
-export HF_TOKEN="your_together_ai_key"
+export API_BASE_URL="https://router.huggingface.co/v1"
+export MODEL_NAME="Qwen/Qwen2.5-3B-Instruct"
+export HF_TOKEN="your_hf_token"
 
 # Run inference
 python inference.py --task easy --seed 42
@@ -37,12 +37,12 @@ python inference.py --task easy --seed 42
    - Repository: Paste URL of your GitHub fork
    - Click "Create space"
 
-2. **Add HF_TOKEN Secret (Together AI API Key)**
+2. **Add HF_TOKEN Secret**
    - Space will start building automatically
    - Navigate to **Settings** → **Repository** → **Secrets**
    - Click "Add secret"
    - Key: `HF_TOKEN`
-   - Value: Paste your Together AI API key from https://www.together.ai/settings/api-keys
+   - Value: Paste your HF API token from https://huggingface.co/settings/tokens
    - Click "Add secret"
 
 3. **Restart the Space**
@@ -52,9 +52,9 @@ python inference.py --task easy --seed 42
 
 ### Verification
 
-Once deployed with Together AI token, you should see output like:
+Once deployed with HF token, you should see output like:
 ```
-[START] task=easy env=cloudsoc model=meta-llama/Qwen2.5-3B-Instruct
+[START] task=easy env=cloudsoc model=Qwen/Qwen2.5-3B-Instruct
 [STEP] step=1 action=aws.soc.get_alerts({}) reward=0.02 done=false error=null
 ...
 [END] success=true steps=8 rewards=0.02,0.02,0.10,0.05,0.10,0.05,0.25,0.10
@@ -107,13 +107,14 @@ Current optimizations:
 **Cause**: Multiple active Spaces consuming resources
 **Solution**: Stop unnecessary Spaces at https://huggingface.co/settings/spaces
 
-## Getting Your API Token (Together AI)
+## Getting Your HF Token
 
-1. Go to https://www.together.ai
-2. Sign up (free account, no credit card required)
-3. Navigate to https://www.together.ai/settings/api-keys
-4. Copy your API key
-5. Add to Space Secrets as `HF_TOKEN` (variable name remains HF_TOKEN for compatibility)
+1. Go to https://huggingface.co/settings/tokens
+2. Click "New token"
+3. Name: `openenv-submission`
+4. Access level: **Read** (sufficient for inference)
+5. Copy the token and save securely
+6. Add to Space Secrets as `HF_TOKEN`
 
 ## Support
 

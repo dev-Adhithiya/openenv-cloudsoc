@@ -39,10 +39,9 @@ from cloud_soc_env import CloudSOCEnv, CloudState, SCENARIOS
 # =============================================================================
 
 # Environment variables with defaults
-# Using Together AI API for Qwen2.5-3B-Instruct
-# Together AI: https://www.together.ai (free tier available, no CC required)
-API_BASE_URL = os.getenv("API_BASE_URL", "https://api.together.xyz/v1")
-MODEL_NAME = os.getenv("MODEL_NAME", "meta-llama/Qwen2.5-3B-Instruct")
+# Using Hugging Face's new router.huggingface.co endpoint (drop-in replacement for old API)
+API_BASE_URL = os.getenv("API_BASE_URL", "https://router.huggingface.co/v1")
+MODEL_NAME = os.getenv("MODEL_NAME", "Qwen/Qwen2.5-3B-Instruct")
 HF_TOKEN = os.getenv("HF_TOKEN")
 
 # Validate HF_TOKEN is provided (required per hackathon guidelines)
@@ -50,10 +49,9 @@ if HF_TOKEN is None:
     raise ValueError(
         "HF_TOKEN environment variable is required.\n"
         "To set it:\n"
-        "  1. Sign up at https://www.together.ai (free, no CC)\n"
-        "  2. Get your API key: https://www.together.ai/settings/api-keys\n"
-        "  3. In HF Space Settings → Secrets, add: HF_TOKEN=<your_key>\n"
-        "  4. Restart the Space"
+        "  1. Get your HF token: https://huggingface.co/settings/tokens\n"
+        "  2. In HF Space Settings → Secrets, add: HF_TOKEN=<your_token>\n"
+        "  3. Restart the Space"
     )
 
 # Initialize OpenAI-compatible client
