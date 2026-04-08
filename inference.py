@@ -15,7 +15,7 @@ Implements:
 Environment Variables:
 - API_BASE_URL: LLM API endpoint (default: Hugging Face Inference API)
 - MODEL_NAME: Model identifier (default: Qwen/Qwen2.5-Coder-32B-Instruct)
-- HF_TOKEN: Hugging Face API token (optional, used for rate limit increase)
+- HF_TOKEN: Hugging Face API token (required for grading)
 """
 
 import os
@@ -665,3 +665,8 @@ def main():
 
 if __name__ == "__main__":
     main()
+    
+    print("====== Agent Run Complete. Keeping container alive for submission. ======")
+    # This prevents the Space from stopping, keeping it in the "Running" state
+    while True:
+        time.sleep(3600)

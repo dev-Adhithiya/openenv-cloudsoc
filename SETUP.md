@@ -54,7 +54,7 @@ python inference.py --task easy --seed 42
 
 Once deployed with HF token, you should see output like:
 ```
-[START] task=easy env=cloudsoc model=Qwen/Qwen2.5-Coder-32B-Instruct
+[START] task=easy env=cloudsoc model=Qwen/Qwen2.5-7B-Instruct
 [STEP] step=1 action=aws.soc.get_alerts({}) reward=0.02 done=false error=null
 ...
 [END] success=true steps=8 rewards=0.02,0.02,0.10,0.05,0.10,0.05,0.25,0.10
