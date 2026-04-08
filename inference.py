@@ -39,12 +39,13 @@ from cloud_soc_env import CloudSOCEnv, CloudState, SCENARIOS
 # =============================================================================
 
 # Environment variables with defaults
-# Using Hugging Face Inference API for Qwen2.5-3B-Instruct
-API_BASE_URL = os.getenv("API_BASE_URL", "https://api-inference.huggingface.co/v1")
-MODEL_NAME = os.getenv("MODEL_NAME", "Qwen/Qwen2.5-3B-Instruct")
+# Using Together AI API for Qwen2.5-3B-Instruct (HF inference API deprecated)
+# Together AI: https://www.together.ai (free tier available, no CC required)
+API_BASE_URL = os.getenv("API_BASE_URL", "https://api.together.xyz/v1")
+MODEL_NAME = os.getenv("MODEL_NAME", "meta-llama/Qwen2.5-3B-Instruct")
 HF_TOKEN = os.getenv("HF_TOKEN", "")
 
-# Initialize OpenAI client (HF_TOKEN will be validated at runtime for actual API calls)
+# Initialize OpenAI-compatible client
 client = OpenAI(
     base_url=API_BASE_URL,
     api_key=HF_TOKEN or "placeholder"  # Allow Space to start, validate at runtime
@@ -187,11 +188,11 @@ def call_llm(messages: List[Dict[str, str]], temperature: float = 0.5, retry_cou
         # Print setup instructions only once
         if not _hf_token_warning_printed:
             error_msg = (
-                "ERROR: HF_TOKEN environment variable is required for inference.\n"
+                "ERROR: API token (HF_TOKEN) is required for inference.\n"
                 "  Setup Instructions:\n"
-                "  1. Go to https://huggingface.co/settings/tokens\n"
-                "  2. Create a new API token (read access is sufficient)\n"
-                "  3. In the HF Space settings, add HF_TOKEN as a Secret\n"
+                "  1. Go to https://www.together.ai (sign up free, no CC required)\n"
+                "  2. Get your API key from https://www.together.ai/settings/api-keys\n"
+                "  3. In the HF Space settings, add HF_TOKEN as a Secret with your Together AI key\n"
                 "  4. Restart the Space\n"
             )
             print(error_msg, file=sys.stderr)
@@ -200,7 +201,7 @@ def call_llm(messages: List[Dict[str, str]], temperature: float = 0.5, retry_cou
         
         # Return error response instead of crashing
         return json.dumps({
-            "thought": "Cannot call LLM: HF_TOKEN not configured. See stderr for setup instructions.",
+            "thought": "Cannot call LLM: API token not configured. See stderr for setup instructions.",
             "tool": "aws.soc.get_alerts",
             "args": {}
         })
