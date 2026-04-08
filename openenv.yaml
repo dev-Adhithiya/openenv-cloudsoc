@@ -1,0 +1,421 @@
+# OpenEnv-CloudSOC Benchmark Specification
+# =========================================
+# Metadata file for the Cloud Security Operations Center benchmark environment
+# Evaluates LLM agents on incident response tasks in simulated AWS environments
+
+name: openenv-cloudsoc
+version: "1.0.0"
+description: |
+  A benchmark environment for evaluating LLM agents on cloud security incident response.
+  Implements Zero-DB architecture with in-memory state management for Docker deployment
+  within 2 vCPU / 8GB RAM constraints.
+
+# Author and License
+author: OpenEnv Contributors
+license: MIT
+repository: https://github.com/openenv/cloudsoc-benchmark
+
+# Environment Metadata
+environment:
+  type: text-based
+  observation_space: json
+  action_space: json_tool_call
+  max_episode_length: 40
+  deterministic: true  # Supports seeded reproducibility
+
+# Hardware Requirements
+hardware:
+  min_vcpu: 2
+  min_ram_gb: 8
+  gpu_required: false
+  external_db_required: false  # Zero-DB architecture
+
+# Tasks Definition
+tasks:
+  easy:
+    name: "Leaky S3 Bucket Discovery"
+    description: "Identify and secure a publicly exposed S3 bucket containing sensitive data"
+    difficulty: 1.0
+    max_steps: 15
+    required_flags:
+      - s3_public_identified
+      - credentials_found
+      - public_access_blocked
+    ground_truth_events:
+      - "Public S3 bucket detected"
+      - "Credentials discovered in bucket"
+      - "Public access blocked"
+    scoring_weights:
+      investigation: 0.5
+      containment: 0.3
+      eradication: 0.1
+      recovery: 0.1
+
+  medium:
+    name: "Credential Compromise Response"
+    description: "Leaked credentials from S3 were used; trace and revoke all compromised access"
+    difficulty: 1.5
+    max_steps: 25
+    required_flags:
+      - leaked_creds_identified
+      - compromised_role_found
+      - role_detached
+      - credentials_rotated
+    ground_truth_events:
+      - "Leaked credentials identified"
+      - "Compromised IAM role discovered"
+      - "Role detached from resources"
+      - "Credentials rotated"
+    scoring_weights:
+      investigation: 0.3
+      containment: 0.4
+      eradication: 0.2
+      recovery: 0.1
+
+  hard:
+    name: "Full Incident Response - Ransomware"
+    description: "Compromised credentials led to IAM backdoor and ransomware deployment. Full IR required."
+    difficulty: 2.0
+    max_steps: 40
+    required_flags:
+      - ransomware_detected
+      - backdoor_identified
+      - forensic_snapshot_taken
+      - instance_isolated
+      - backdoor_removed
+      - all_creds_rotated
+      - systems_verified
+    ground_truth_events:
+      - "Ransomware indicators detected"
+      - "Backdoor IAM role identified"
+      - "Forensic snapshot taken"
+      - "Compromised instance isolated"
+      - "Backdoor role removed"
+      - "All credentials rotated"
+      - "Systems verified clean"
+    scoring_weights:
+      investigation: 0.25
+      containment: 0.25
+      eradication: 0.3
+      recovery: 0.2
+
+# Available Tools
+tools:
+  # Observation Tools (with resource costs)
+  - name: aws.cloudwatch.query_basic
+    description: "Query CloudWatch logs (truncated results)"
+    cost: -0.01
+    args:
+      - name: log_group
+        type: string
+        required: true
+      - name: start_time
+        type: string
+        required: false
+      - name: end_time
+        type: string
+        required: false
+      - name: filter_pattern
+        type: string
+        required: false
+
+  - name: aws.cloudwatch.query_deep
+    description: "Query CloudWatch logs (full results, higher cost)"
+    cost: -0.05
+    args:
+      - name: log_group
+        type: string
+        required: true
+      - name: start_time
+        type: string
+        required: false
+      - name: end_time
+        type: string
+        required: false
+      - name: filter_pattern
+        type: string
+        required: false
+
+  # EC2 Tools
+  - name: aws.ec2.describe
+    description: "Describe EC2 instances"
+    cost: 0
+    args:
+      - name: instance_id
+        type: string
+        required: false
+
+  - name: aws.ec2.snapshot
+    description: "Create forensic snapshot (REQUIRED before isolation)"
+    cost: 0
+    preconditions: []
+    args:
+      - name: instance_id
+        type: string
+        required: true
+      - name: snapshot_type
+        type: string
+        required: false
+        default: forensic
+
+  - name: aws.ec2.isolate
+    description: "Isolate EC2 instance from network"
+    cost: 0
+    preconditions:
+      - "Instance must have forensic snapshot"
+    args:
+      - name: instance_id
+        type: string
+        required: true
+
+  - name: aws.ec2.terminate
+    description: "⚠️ DANGER: Permanently terminates instance, destroys forensic evidence"
+    cost: -1.0
+    danger: true
+    args:
+      - name: instance_id
+        type: string
+        required: true
+
+  # IAM Tools
+  - name: aws.iam.describe_role
+    description: "Describe IAM role"
+    cost: 0
+    args:
+      - name: role_name
+        type: string
+        required: false
+
+  - name: aws.iam.detach_role
+    description: "Detach IAM role from resources"
+    cost: 0
+    args:
+      - name: role_name
+        type: string
+        required: true
+      - name: instance_id
+        type: string
+        required: false
+
+  - name: aws.iam.revoke_credentials
+    description: "Revoke compromised credentials"
+    cost: 0
+    args:
+      - name: key_id
+        type: string
+        required: true
+
+  - name: aws.iam.list_policies
+    description: "List IAM policies"
+    cost: 0
+    args: []
+
+  # S3 Tools
+  - name: aws.s3.get_bucket_policy
+    description: "Get S3 bucket policy"
+    cost: 0
+    args:
+      - name: bucket_name
+        type: string
+        required: true
+
+  - name: aws.s3.block_public_access
+    description: "Block public access to S3 bucket"
+    cost: 0
+    args:
+      - name: bucket_name
+        type: string
+        required: true
+
+  - name: aws.s3.list_objects
+    description: "List objects in S3 bucket"
+    cost: 0
+    args:
+      - name: bucket_name
+        type: string
+        required: true
+
+  # RDS Tools
+  - name: aws.rds.rotate_credentials
+    description: "Rotate database credentials"
+    cost: 0
+    preconditions:
+      - "Compromised IAM roles must be detached first"
+    args:
+      - name: resource_id
+        type: string
+        required: true
+
+  # Security Group Tools
+  - name: aws.security_group.modify
+    description: "Modify security group (isolate/restore)"
+    cost: 0
+    args:
+      - name: security_group_id
+        type: string
+        required: true
+      - name: action
+        type: string
+        required: true
+        enum: [isolate, restore]
+
+  # Investigation Tools
+  - name: aws.investigate
+    description: "General investigation tool"
+    cost: 0
+    args:
+      - name: target_type
+        type: string
+        required: true
+        enum: [ip, user, role, instance]
+      - name: target_id
+        type: string
+        required: true
+
+  # SOC Tools
+  - name: aws.soc.get_alerts
+    description: "Get current SOC alerts"
+    cost: 0
+    args: []
+
+  - name: aws.soc.close_incident
+    description: "Close incident with timeline (FINAL action to complete task)"
+    cost: 0
+    args:
+      - name: incident_id
+        type: string
+        required: false
+        default: INC-001
+      - name: timeline
+        type: array
+        required: true
+        description: "Ordered list of incident events"
+      - name: root_cause
+        type: string
+        required: false
+      - name: remediation_summary
+        type: string
+        required: false
+
+  # GuardDuty Tools
+  - name: aws.guardduty.get_findings
+    description: "Get GuardDuty security findings"
+    cost: 0
+    args: []
+
+  # CloudTrail Tools
+  - name: aws.cloudtrail.lookup_events
+    description: "Lookup CloudTrail events"
+    cost: 0
+    args: []
+
+# Evaluation Metrics
+metrics:
+  primary: weighted_total_score
+  components:
+    - name: investigation_score
+      weight: variable  # Depends on task
+      description: "Score for threat identification and analysis"
+    - name: containment_score
+      weight: variable
+      description: "Score for limiting threat spread"
+    - name: eradication_score
+      weight: variable
+      description: "Score for removing threat actors"
+    - name: recovery_score
+      weight: variable
+      description: "Score for restoring normal operations"
+    - name: timeline_accuracy
+      weight: 0.5
+      description: "Accuracy of incident timeline reconstruction"
+    - name: efficiency
+      weight: implicit
+      description: "Resource cost optimization (query costs)"
+
+# Mechanics Implemented
+mechanics:
+  - id: 1
+    name: "Deceptive Environment"
+    description: "Logs contain noise, red herrings, and legitimate attack traces"
+    
+  - id: 2
+    name: "Partial Observability & Resource Costs"
+    description: "Basic queries cost -0.01, deep queries cost -0.05"
+    
+  - id: 3
+    name: "Strict Action Preconditions"
+    description: "Causal chains enforce proper IR procedure"
+    
+  - id: 4
+    name: "Adversarial Traps"
+    description: "Terminating compromised instances destroys evidence"
+    
+  - id: 5
+    name: "Gradient Reward Shaping"
+    description: "+0.02 per new flag discovered"
+    
+  - id: 6
+    name: "Memory Pressure Simulation"
+    description: "Sliding context window of 6 turns"
+    
+  - id: 7
+    name: "Tool Abstraction Layer"
+    description: "Strict JSON schema for tool calls"
+    
+  - id: 8
+    name: "Rich Final Scoring"
+    description: "Structured breakdown by IR phase"
+    
+  - id: 9
+    name: "Deterministic Seed Mode"
+    description: "100% reproducible with seed parameter"
+    
+  - id: 10
+    name: "Chain-of-Thought Prompting"
+    description: "Required format includes thought field"
+    
+  - id: 11
+    name: "Multi-Task Shared State"
+    description: "Campaign mode passes state between tasks"
+    
+  - id: 12
+    name: "Incident Timeline Reconstruction"
+    description: "Final action requires timeline for grading"
+
+# Agent Requirements
+agent_requirements:
+  response_format:
+    type: json
+    schema:
+      thought:
+        type: string
+        required: true
+        description: "1-sentence internal reasoning"
+      tool:
+        type: string
+        required: true
+        description: "Tool name to invoke"
+      args:
+        type: object
+        required: true
+        description: "Tool arguments"
+  
+  warnings:
+    - "aws.ec2.terminate destroys all forensic evidence on compromised instances"
+    - "Must take forensic snapshot before isolating instances"
+    - "Must detach compromised roles before rotating credentials"
+    - "Query costs accumulate and reduce final score"
+
+# Campaign Mode
+campaign:
+  enabled: true
+  task_order:
+    - easy
+    - medium
+    - hard
+  state_transfer: true
+  description: |
+    In campaign mode, tasks form a continuous story:
+    1. Easy: Discover leaky S3 bucket
+    2. Medium: The bucket contained credentials; trace and revoke them
+    3. Hard: Credentials were used to backdoor IAM and deploy ransomware
