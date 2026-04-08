@@ -11,7 +11,7 @@ Output shows correct [START]/[STEP]/[END] format
 QUICK FIX - COPY & PASTE THIS
 ================================================================================
 
-$env:HF_TOKEN = "REDACTED"
+$env:HF_TOKEN = "YOUR_HF_TOKEN_HERE"  # Replace with your token from https://huggingface.co/settings/tokens
 $env:MODEL_NAME = "gpt-4o-mini"
 python inference.py --task easy --seed 42
 

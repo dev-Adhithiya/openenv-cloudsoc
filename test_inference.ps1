@@ -1,7 +1,8 @@
 # Test inference with proper environment setup
 
 # Set environment variables using PowerShell syntax
-$env:HF_TOKEN = "REDACTED"
+# Replace YOUR_HF_TOKEN_HERE with your actual token from https://huggingface.co/settings/tokens
+$env:HF_TOKEN = "YOUR_HF_TOKEN_HERE"
 $env:MODEL_NAME = "gpt-4o-mini"
 $env:API_BASE_URL = "https://api.openai.com/v1"
 

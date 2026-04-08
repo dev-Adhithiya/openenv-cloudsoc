@@ -7,9 +7,9 @@ set HF_TOKEN=hf_...  # WRONG - doesn't work in PowerShell
 ```
 
 ## Solution
-Use PowerShell's `$env:` syntax:
+Use PowerShell's `$env:` syntax with your own token:
 ```powershell
-$env:HF_TOKEN = "REDACTED"
+$env:HF_TOKEN = "YOUR_HF_TOKEN_HERE"  # Replace with your token from https://huggingface.co/settings/tokens
 $env:MODEL_NAME = "gpt-4o-mini"
 ```
 
@@ -19,7 +19,7 @@ $env:MODEL_NAME = "gpt-4o-mini"
 Use this for immediate testing (variables expire when you close PowerShell):
 
 ```powershell
-$env:HF_TOKEN = "REDACTED"
+$env:HF_TOKEN = "YOUR_HF_TOKEN_HERE"  # Replace with your token
 $env:MODEL_NAME = "gpt-4o-mini"
 $env:API_BASE_URL = "https://api.openai.com/v1"
 
@@ -35,7 +35,7 @@ Create a `.ps1` file with environment variables + command:
 
 ```powershell
 # File: run_inference.ps1
-$env:HF_TOKEN = "REDACTED"
+$env:HF_TOKEN = "YOUR_HF_TOKEN_HERE"  # Replace with your token
 $env:MODEL_NAME = "gpt-4o-mini"
 
 python inference.py --task easy --seed 42
@@ -58,7 +58,7 @@ If you want variables to persist across sessions:
 
 ```powershell
 # Permanent for current user
-[Environment]::SetEnvironmentVariable("HF_TOKEN", "REDACTED", "User")
+[Environment]::SetEnvironmentVariable("HF_TOKEN", "YOUR_HF_TOKEN_HERE", "User")
 
 # Then restart PowerShell or refresh:
 $env:HF_TOKEN = [Environment]::GetEnvironmentVariable("HF_TOKEN", "User")
@@ -88,7 +88,7 @@ Or via GUI:
 
 ### Single Command (One-Liner)
 ```powershell
-$env:HF_TOKEN="REDACTED"; $env:MODEL_NAME="gpt-4o-mini"; cd "F:\Meta Hackathon V2"; python inference.py --task easy --seed 42
+$env:HF_TOKEN="YOUR_HF_TOKEN_HERE"; $env:MODEL_NAME="gpt-4o-mini"; cd "F:\Meta Hackathon V2"; python inference.py --task easy --seed 42
 ```
 
 ### Using the Script
@@ -132,7 +132,7 @@ If you use Command Prompt (cmd.exe) instead of PowerShell:
 **File: run_test.bat**
 ```batch
 @echo off
-set HF_TOKEN=REDACTED
+set HF_TOKEN=YOUR_HF_TOKEN_HERE
 set MODEL_NAME=gpt-4o-mini
 set API_BASE_URL=https://api.openai.com/v1
 
