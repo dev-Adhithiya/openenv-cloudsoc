@@ -1,3 +1,13 @@
+---
+title: OpenEnv-CloudSOC
+emoji: 🔒
+colorFrom: blue
+colorTo: indigo
+sdk: docker
+app_file: inference.py
+pinned: false
+---
+
 # OpenEnv-CloudSOC Benchmark
 
 A production-ready benchmark environment for evaluating LLM agents on cloud security incident response tasks.
