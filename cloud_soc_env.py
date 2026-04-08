@@ -1787,29 +1787,29 @@ You MUST respond with valid JSON in this exact format:
 {chr(10).join(f'• {t}' for t in available_tools)}
 
 ## TOOL PARAMETER SCHEMAS (MANDATORY - Use exact parameter names)
-• aws.s3.get_bucket_policy: args: {"bucket_name": "string"}
-• aws.s3.list_objects: args: {"bucket_name": "string"}
-• aws.s3.block_public_access: args: {"bucket_name": "string"}
-• aws.ec2.describe: args: {"instance_id": "string"} (optional)
-• aws.ec2.isolate: args: {"instance_id": "string"}
-• aws.ec2.snapshot: args: {"instance_id": "string"}
-• aws.ec2.terminate: args: {"instance_id": "string"}
-• aws.iam.describe_role: args: {"role_name": "string"}
-• aws.iam.detach_role: args: {"role_name": "string", "resource_id": "string"}
-• aws.iam.revoke_credentials: args: {"principal": "string", "credential_type": "string"}
-• aws.cloudwatch.query_basic: args: {"log_group": "string", "query": "string"}
-• aws.cloudwatch.query_deep: args: {"log_group": "string", "query": "string"}
-• aws.cloudtrail.lookup_events: args: {"event_names": [list], "max_results": int}
-• aws.soc.close_incident: args: {"timeline": [list of strings]}
-• aws.investigate: args: {"query": "string"}
-• aws.security_group.modify: args: {"group_id": "string", "action": "string"}
-• aws.rds.rotate_credentials: args: {"instance_id": "string"}
-• aws.guardduty.get_findings: args: {} (no args required)
-• aws.soc.get_alerts: args: {} (no args required)
-• aws.config.get_compliance: args: {} (no args required)
-• aws.ssm.run_command: args: {"instance_id": "string", "command": "string"}
-• aws.lambda.list_functions: args: {} (no args required)
-• aws.sts.get_caller_identity: args: {} (no args required)
+• aws.s3.get_bucket_policy: args: {{"bucket_name": "string"}}
+• aws.s3.list_objects: args: {{"bucket_name": "string"}}
+• aws.s3.block_public_access: args: {{"bucket_name": "string"}}
+• aws.ec2.describe: args: {{"instance_id": "string"}} (optional)
+• aws.ec2.isolate: args: {{"instance_id": "string"}}
+• aws.ec2.snapshot: args: {{"instance_id": "string"}}
+• aws.ec2.terminate: args: {{"instance_id": "string"}}
+• aws.iam.describe_role: args: {{"role_name": "string"}}
+• aws.iam.detach_role: args: {{"role_name": "string", "resource_id": "string"}}
+• aws.iam.revoke_credentials: args: {{"principal": "string", "credential_type": "string"}}
+• aws.cloudwatch.query_basic: args: {{"log_group": "string", "query": "string"}}
+• aws.cloudwatch.query_deep: args: {{"log_group": "string", "query": "string"}}
+• aws.cloudtrail.lookup_events: args: {{"event_names": [list], "max_results": int}}
+• aws.soc.close_incident: args: {{"timeline": [list of strings]}}
+• aws.investigate: args: {{"query": "string"}}
+• aws.security_group.modify: args: {{"group_id": "string", "action": "string"}}
+• aws.rds.rotate_credentials: args: {{"instance_id": "string"}}
+• aws.guardduty.get_findings: args: {{}} (no args required)
+• aws.soc.get_alerts: args: {{}} (no args required)
+• aws.config.get_compliance: args: {{}} (no args required)
+• aws.ssm.run_command: args: {{"instance_id": "string", "command": "string"}}
+• aws.lambda.list_functions: args: {{}} (no args required)
+• aws.sts.get_caller_identity: args: {{}} (no args required)
 
 ## CURRENT STATUS
 • Step: {self.current_step}/{self.max_steps}
