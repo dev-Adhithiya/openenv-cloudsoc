@@ -39,20 +39,42 @@ from cloud_soc_env import CloudSOCEnv, CloudState, SCENARIOS
 # =============================================================================
 
 # Environment variables with defaults
-# Using Together AI API for Qwen2.5-3B-Instruct (HF inference API deprecated)
+# Using Together AI API for Qwen2.5-3B-Instruct
 # Together AI: https://www.together.ai (free tier available, no CC required)
 API_BASE_URL = os.getenv("API_BASE_URL", "https://api.together.xyz/v1")
 MODEL_NAME = os.getenv("MODEL_NAME", "meta-llama/Qwen2.5-3B-Instruct")
-HF_TOKEN = os.getenv("HF_TOKEN", "")
+HF_TOKEN = os.getenv("HF_TOKEN")
+
+# Validate HF_TOKEN is provided (required per hackathon guidelines)
+if HF_TOKEN is None:
+    raise ValueError(
+        "HF_TOKEN environment variable is required.\n"
+        "To set it:\n"
+        "  1. Sign up at https://www.together.ai (free, no CC)\n"
+        "  2. Get your API key: https://www.together.ai/settings/api-keys\n"
+        "  3. In HF Space Settings → Secrets, add: HF_TOKEN=<your_key>\n"
+        "  4. Restart the Space"
+    )
 
 # Initialize OpenAI-compatible client
 client = OpenAI(
     base_url=API_BASE_URL,
-    api_key=HF_TOKEN or "placeholder"  # Allow Space to start, validate at runtime
+    api_key=HF_TOKEN
 )
 
-# Flag to track if HF_TOKEN warning has been printed
-_hf_token_warning_printed = False
+
+class AgentState(Enum):
+    """Track agent's cognitive state for adaptive prompting"""
+    EXPLORING = "exploring"
+    INVESTIGATING = "investigating"
+    CONTAINING = "containing"
+    RECOVERING = "recovering"
+    CLOSING = "closing"
+
+
+# =============================================================================
+# MEMORY PRESSURE MANAGER (Mechanic #6)
+# =============================================================================
 
 # Memory pressure settings (Mechanic #6)
 # Optimized for 2vCPU/8GB RAM - reduce context window
@@ -174,37 +196,14 @@ def emit_end(success: bool, steps: int, rewards: List[float]):
 
 def call_llm(messages: List[Dict[str, str]], temperature: float = 0.5, retry_count: int = 0) -> str:
     """
-    Call the LLM with given messages via Hugging Face Inference API.
+    Call the LLM with given messages via Together AI API.
     
     Optimized for Qwen2.5-3B-Instruct on 2vCPU/8GB RAM.
     Implements adaptive temperature: increases on retries for diversity.
     Returns the raw response content.
+    
+    Note: HF_TOKEN is validated at startup, so guaranteed to be set here.
     """
-    
-    global _hf_token_warning_printed
-    
-    # Validate HF_TOKEN at runtime (required per hackathon guidelines)
-    if not HF_TOKEN:
-        # Print setup instructions only once
-        if not _hf_token_warning_printed:
-            error_msg = (
-                "ERROR: API token (HF_TOKEN) is required for inference.\n"
-                "  Setup Instructions:\n"
-                "  1. Go to https://www.together.ai (sign up free, no CC required)\n"
-                "  2. Get your API key from https://www.together.ai/settings/api-keys\n"
-                "  3. In the HF Space settings, add HF_TOKEN as a Secret with your Together AI key\n"
-                "  4. Restart the Space\n"
-            )
-            print(error_msg, file=sys.stderr)
-            sys.stderr.flush()
-            _hf_token_warning_printed = True
-        
-        # Return error response instead of crashing
-        return json.dumps({
-            "thought": "Cannot call LLM: API token not configured. See stderr for setup instructions.",
-            "tool": "aws.soc.get_alerts",
-            "args": {}
-        })
     
     # Adaptive temperature: increase slightly on retries to get different outputs
     # Lower baseline temp (0.5) for 3B model to be more deterministic
