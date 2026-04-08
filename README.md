@@ -83,6 +83,22 @@ export HF_TOKEN="your_token_here"
 | `requirements.txt` | - | Dependencies (gymnasium, pydantic, openai) |
 | `Dockerfile` | - | Docker build for 2 vCPU/8GB constraint |
 
+## Hugging Face Spaces Deployment
+
+To deploy this benchmark to Hugging Face Spaces:
+
+1. **Fork or clone** this repository to your GitHub account
+2. **Create a new Space** at https://huggingface.co/new-space
+   - Space name: `openenv-cloudsoc`
+   - SDK: **Docker**
+   - Repository: Link to your GitHub fork
+3. **Add HF_TOKEN Secret**:
+   - Go to Space Settings → Secrets
+   - Add `HF_TOKEN` with your Hugging Face API token (get one at https://huggingface.co/settings/tokens)
+4. **Space will build and deploy automatically**
+
+Once deployed, the Space will run inference on startup. Monitor the logs in the Space UI.
+
 ## Scenarios
 
 ### Easy: Leaky S3 Bucket Discovery

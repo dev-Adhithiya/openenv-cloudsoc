@@ -15,8 +15,11 @@ COPY inference.py .
 COPY openenv.yaml .
 
 # Environment variables (defaults)
-ENV API_BASE_URL="https://api.openai.com/v1"
-ENV MODEL_NAME="gpt-4.1-mini"
+# Note: HF_TOKEN should be set as a Space Secret in the HF UI
+# For local testing without a token, inference will gracefully fail with clear error
+ENV API_BASE_URL="https://api-inference.huggingface.co/v1"
+ENV MODEL_NAME="Qwen/Qwen2.5-3B-Instruct"
+ENV HF_TOKEN=""
 
-# Run inference
+# Run inference - default task is 'easy'
 CMD ["python", "inference.py", "--task", "easy"]
