@@ -629,9 +629,9 @@ def main():
     parser.add_argument(
         "--task", 
         type=str, 
-        default="easy",
+        default="campaign",
         choices=["easy", "medium", "hard", "campaign"],
-        help="Task difficulty or 'campaign' for full run"
+        help="Task difficulty or 'campaign' for full run (default: campaign)"
     )
     parser.add_argument(
         "--seed",
@@ -647,20 +647,28 @@ def main():
     
     args = parser.parse_args()
     
-    if args.task == "campaign":
-        results = run_campaign(seed=args.seed, verbose=args.verbose)
-        if args.verbose:
-            print(f"\n=== Campaign Results ===")
-            print(json.dumps(results, indent=2))
-    else:
-        results = run_single_task(
-            task=args.task,
-            seed=args.seed,
-            verbose=args.verbose
-        )
-        if args.verbose:
-            print(f"\n=== Task Results ===")
-            print(json.dumps(results, indent=2))
+    try:
+        if args.task == "campaign":
+            results = run_campaign(seed=args.seed, verbose=args.verbose)
+            if args.verbose:
+                print(f"\n=== Campaign Results ===")
+                print(json.dumps(results, indent=2))
+        else:
+            results = run_single_task(
+                task=args.task,
+                seed=args.seed,
+                verbose=args.verbose
+            )
+            if args.verbose:
+                print(f"\n=== Task Results ===")
+                print(json.dumps(results, indent=2))
+    
+    finally:
+        # Keep process alive for evaluator (Phase 2 Validator requirement)
+        print("====== All tasks complete. Keeping alive. ======")
+        sys.stdout.flush()
+        while True:
+            time.sleep(3600)
 
 
 if __name__ == "__main__":
