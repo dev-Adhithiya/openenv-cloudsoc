@@ -32,75 +32,12 @@ hardware:
 
 # Tasks Definition
 tasks:
-  easy:
-    name: "Leaky S3 Bucket Discovery"
-    description: "Identify and secure a publicly exposed S3 bucket containing sensitive data"
-    grader: "env.graders:grade_easy"
-    difficulty: 1.0
-    max_steps: 15
-    required_flags:
-      - s3_public_identified
-      - credentials_found
-      - public_access_blocked
-    ground_truth_events:
-      - "Public S3 bucket detected"
-      - "Credentials discovered in bucket"
-      - "Public access blocked"
-    scoring_weights:
-      investigation: 0.5
-      containment: 0.3
-      eradication: 0.1
-      recovery: 0.1
-
-  medium:
-    name: "Credential Compromise Response"
-    description: "Leaked credentials from S3 were used; trace and revoke all compromised access"
-    grader: "env.graders:grade_medium"
-    difficulty: 1.5
-    max_steps: 25
-    required_flags:
-      - leaked_creds_identified
-      - compromised_role_found
-      - role_detached
-      - credentials_rotated
-    ground_truth_events:
-      - "Leaked credentials identified"
-      - "Compromised IAM role discovered"
-      - "Role detached from resources"
-      - "Credentials rotated"
-    scoring_weights:
-      investigation: 0.3
-      containment: 0.4
-      eradication: 0.2
-      recovery: 0.1
-
-  hard:
-    name: "Full Incident Response - Ransomware"
-    description: "Compromised credentials led to IAM backdoor and ransomware deployment. Full IR required."
-    grader: "env.graders:grade_hard"
-    difficulty: 2.0
-    max_steps: 40
-    required_flags:
-      - ransomware_detected
-      - backdoor_identified
-      - forensic_snapshot_taken
-      - instance_isolated
-      - backdoor_removed
-      - all_creds_rotated
-      - systems_verified
-    ground_truth_events:
-      - "Ransomware indicators detected"
-      - "Backdoor IAM role identified"
-      - "Forensic snapshot taken"
-      - "Compromised instance isolated"
-      - "Backdoor role removed"
-      - "All credentials rotated"
-      - "Systems verified clean"
-    scoring_weights:
-      investigation: 0.25
-      containment: 0.25
-      eradication: 0.3
-      recovery: 0.2
+  - id: "easy"
+    grader: "graders:grade_easy"
+  - id: "medium"
+    grader: "graders:grade_medium"
+  - id: "hard"
+    grader: "graders:grade_hard"
 
 # Available Tools
 tools:
