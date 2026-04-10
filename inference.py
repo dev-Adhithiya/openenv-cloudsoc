@@ -213,20 +213,17 @@ def call_llm(messages: List[Dict[str, str]], temperature: float = 0.5, retry_cou
             messages=messages,
             temperature=adaptive_temp,
             max_tokens=MAX_TOKENS,  # Optimized for 8GB RAM
-            timeout=45.0  # Slightly longer timeout for smaller model
+            timeout=20.0  # Hard timeout: 20 seconds
         )
         return response.choices[0].message.content or ""
     except Exception as e:
         error_type = type(e).__name__
         error_msg = str(e)[:100]
-        # Log error but still return valid JSON fallback
+        # Log error but still return safe fallback action
         sys.stderr.write(f"[LLM_ERROR] {error_type}: {error_msg}\n")
         sys.stderr.flush()
-        return json.dumps({
-            "thought": f"LLM API error ({error_type}): {error_msg}",
-            "tool": "aws.soc.get_alerts",
-            "args": {}
-        })
+        # Return safe fallback action string
+        return "Action: aws.soc.get_alerts({})"
 
 
 def parse_llm_response(response: str) -> Tuple[Optional[Dict], Optional[str]]:
@@ -664,11 +661,12 @@ def main():
                 print(json.dumps(results, indent=2))
     
     finally:
-        # Keep process alive for evaluator (Phase 2 Validator requirement)
+        # Graceful exit after task completion
         print("====== All tasks complete. Keeping alive. ======")
         sys.stdout.flush()
-        while True:
-            time.sleep(3600)
+        time.sleep(900)  # Wait 15 minutes before exit
+        print('Waking up and exiting cleanly')
+        sys.stdout.flush()
 
 
 if __name__ == "__main__":
