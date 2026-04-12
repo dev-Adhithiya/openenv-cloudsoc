@@ -47,8 +47,18 @@ def grade_easy(trajectory):
     # 3. Did they successfully isolate the instance? (40% credit)
     if "isolate_instance" in actions_str:
         score += 0.4
-        
-    return round(min(max(score, 0.01), 0.99), 2)
+    
+    # Clamp to valid range [0.01, 0.99]
+    score = max(0.01, min(score, 0.99))
+    
+    # Round to 2 decimal places
+    score = round(score, 2)
+    
+    # Validate final score is in range
+    if score <= 0.0 or score >= 1.0:
+        return 0.5
+    
+    return score
 
 def grade_medium(trajectory):
     """
@@ -75,7 +85,17 @@ def grade_medium(trajectory):
     if "isolate_instance" in actions_str:
         score += 0.3
 
-    return round(min(max(score, 0.01), 0.99), 2)
+    # Clamp to valid range [0.01, 0.99]
+    score = max(0.01, min(score, 0.99))
+    
+    # Round to 2 decimal places
+    score = round(score, 2)
+    
+    # Validate final score is in range
+    if score <= 0.0 or score >= 1.0:
+        return 0.5
+    
+    return score
 
 def grade_hard(trajectory):
     """
@@ -88,7 +108,7 @@ def grade_hard(trajectory):
     
     # FATAL ERROR: Did they kill the production database? (Automatic Failure)
     if "terminate_db" in actions_str or "stop_db" in actions_str:
-        return 0.01
+        return 0.02  # Return safe value that's strictly between 0 and 1
     
     # 1. Investigated alerts and logs? (20% credit)
     if "get_alerts" in actions_str:
@@ -104,4 +124,14 @@ def grade_hard(trajectory):
     if "isolate_instance" in actions_str:
         score += 0.4
 
-    return round(min(max(score, 0.01), 0.99), 2)
+    # Clamp to valid range [0.01, 0.99]
+    score = max(0.01, min(score, 0.99))
+    
+    # Round to 2 decimal places
+    score = round(score, 2)
+    
+    # Validate final score is in range
+    if score <= 0.0 or score >= 1.0:
+        return 0.5
+    
+    return score
