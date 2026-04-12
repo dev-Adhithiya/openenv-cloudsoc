@@ -577,9 +577,8 @@ def run_campaign(
         if success:
             tasks_passed += 1
             current_state = final_state  # Pass state to next task
-        else:
-            # Campaign fails if any task fails
-            break
+        # Continue to next task regardless of success/failure
+        # This ensures all 3 tasks run for grading
     
     results["overall_success"] = tasks_passed == 3
     results["tasks_passed"] = tasks_passed
