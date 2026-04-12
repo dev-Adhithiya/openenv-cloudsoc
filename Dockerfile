@@ -12,8 +12,8 @@ RUN pip install --no-cache-dir -r requirements.txt
 # Copy application code
 COPY cloud_soc_env.py .
 COPY inference.py .
+COPY graders.py .
 COPY openenv.yaml .
-
 COPY dummy_server.py .
 
 # Environment variables (defaults)
