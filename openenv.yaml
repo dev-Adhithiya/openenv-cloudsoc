@@ -33,11 +33,12 @@ hardware:
 # Tasks Definition
 tasks:
   - id: "easy"
-      grader: "env.graders:grade_easy"
-    - id: "medium"
-      grader: "env.graders:grade_medium"
-    - id: "hard"
-      grader: "env.graders:grade_hard"
+    grader: "graders:grade_easy"
+  - id: "medium"
+    grader: "graders:grade_medium"
+  - id: "hard"
+    grader: "graders:grade_hard"
+
 tools:
   # Observation Tools (with resource costs)
   - name: aws.cloudwatch.query_basic
