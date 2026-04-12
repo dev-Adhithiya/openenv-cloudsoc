@@ -83,3 +83,11 @@ def step(action: Action):
 def state():
     """Returns current state of the environment"""
     return {"state": env.state.to_dict()}
+
+def main():
+    """Main entry point for running the server"""
+    import uvicorn
+    uvicorn.run(app, host="0.0.0.0", port=7860)
+
+if __name__ == "__main__":
+    main()
