@@ -47,6 +47,7 @@ A production-ready benchmark environment for evaluating LLM agents on cloud secu
 
 ```bash
 pip install -r requirements.txt
+pip install fastapi uvicorn
 ```
 
 **For detailed setup instructions, see [SETUP.md](SETUP.md)**

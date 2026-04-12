@@ -15,6 +15,7 @@ COPY inference.py .
 COPY graders.py .
 COPY openenv.yaml .
 COPY dummy_server.py .
+COPY server/ ./server/
 
 # Environment variables (defaults)
 # Using HF's new router.huggingface.co endpoint
@@ -22,6 +23,5 @@ ENV API_BASE_URL="https://router.huggingface.co/v1"
 ENV MODEL_NAME="Qwen/Qwen2.5-Coder-32B-Instruct"
 ENV HF_TOKEN=""
 
-# Run a dummy HTTP server to keep the Hugging Face Space in the "Running" state
-# The evaluation system will exec into this container to run inference.py
-CMD ["python", "dummy_server.py"]
+# Run FastAPI server conforming to OpenEnv REST spec
+CMD ["uvicorn", "server.app:app", "--host", "0.0.0.0", "--port", "7860"]

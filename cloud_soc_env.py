@@ -29,6 +29,18 @@ from collections import defaultdict
 import gymnasium as gym
 from gymnasium import spaces
 
+class Observation(BaseModel):
+    state_description: str
+    metadata: Optional[Dict[str, Any]] = None
+
+class Action(BaseModel):
+    tool: str
+    args: Dict[str, Any]
+
+class Reward(BaseModel):
+    value: float
+    reason: Optional[str] = None
+
 
 # =============================================================================
 # CONSTANTS AND CONFIGURATION
@@ -1577,7 +1589,8 @@ class CloudSOCEnv(gym.Env):
         # Normalize to 0-1 range
         normalized = min(1.0, score / (max_score + 0.8))
         
-        return normalized
+        # Scale to 0.1 - 0.9 per requirements
+        return 0.1 + (normalized * 0.8)
     
     def _process_discovered_flags(self, new_flags: set) -> float:
         """
@@ -1621,11 +1634,14 @@ class CloudSOCEnv(gym.Env):
             for phase in weights
         )
         
+        # Adjust weighted_total to range 0.1 to 0.9 rigidly
+        weighted_total = 0.1 + (weighted_total * 0.8)
+        
         return {
-            "investigation": round(normalized["investigation"], 3),
-            "containment": round(normalized["containment"], 3),
-            "eradication": round(normalized["eradication"], 3),
-            "recovery": round(normalized["recovery"], 3),
+            "investigation": round(0.1 + (normalized["investigation"] * 0.8), 3),
+            "containment": round(0.1 + (normalized["containment"] * 0.8), 3),
+            "eradication": round(0.1 + (normalized["eradication"] * 0.8), 3),
+            "recovery": round(0.1 + (normalized["recovery"] * 0.8), 3),
             "weighted_total": round(weighted_total, 3),
             "query_costs": round(self.query_costs, 3),
             "total_reward": round(self.total_reward, 3)
