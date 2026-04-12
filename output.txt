@@ -1,0 +1,185 @@
+============================= test session starts =============================
+platform win32 -- Python 3.14.3, pytest-9.0.2, pluggy-1.6.0
+rootdir: F:\Meta Hackathon V2
+configfile: pyproject.toml
+plugins: anyio-4.13.0
+collected 23 items
+
+test_cloudsoc.py ......F....FFs..F....F.                                 [100%]
+
+================================== FAILURES ===================================
+________________ TestToolExecution.test_cloudwatch_deep_query _________________
+
+self = <test_cloudsoc.TestToolExecution testMethod=test_cloudwatch_deep_query>
+
+    def test_cloudwatch_deep_query(self):
+        """Test deep CloudWatch query"""
+        action = json.dumps({
+            "thought": "Deep query",
+            "tool": "aws.cloudwatch.query_deep",
+            "args": {"log_group": "/aws/ec2"}
+        })
+        obs, reward, term, trunc, info = self.env.step(action)
+    
+        # Deep query should cost -0.05
+>       self.assertAlmostEqual(reward, -0.05, places=2)
+E       AssertionError: 0.009999999999999995 != -0.05 within 2 places (0.06 difference)
+
+test_cloudsoc.py:143: AssertionError
+____________ TestPreconditions.test_isolate_without_snapshot_fails ____________
+
+self = <test_cloudsoc.TestPreconditions testMethod=test_isolate_without_snapshot_fails>
+
+    def setUp(self):
+        self.env = CloudSOCEnv(task="easy", seed=42)
+        self.env.reset()
+        # Get a compromised instance
+        self.instance_id = None
+        for iid, inst in self.env.state.instances.items():
+            if inst.is_compromised:
+                self.instance_id = iid
+                break
+>       self.assertTrue(self.instance_id is not None, "No compromised instance found")
+E       AssertionError: False is not true : No compromised instance found
+
+test_cloudsoc.py:159: AssertionError
+____________ TestPreconditions.test_snapshot_then_isolate_succeeds ____________
+
+self = <test_cloudsoc.TestPreconditions testMethod=test_snapshot_then_isolate_succeeds>
+
+    def setUp(self):
+        self.env = CloudSOCEnv(task="easy", seed=42)
+        self.env.reset()
+        # Get a compromised instance
+        self.instance_id = None
+        for iid, inst in self.env.state.instances.items():
+            if inst.is_compromised:
+                self.instance_id = iid
+                break
+>       self.assertTrue(self.instance_id is not None, "No compromised instance found")
+E       AssertionError: False is not true : No compromised instance found
+
+test_cloudsoc.py:159: AssertionError
+_________ TestClosingIncident.test_close_incident_with_empty_timeline _________
+
+self = <test_cloudsoc.TestClosingIncident testMethod=test_close_incident_with_empty_timeline>
+
+    def test_close_incident_with_empty_timeline(self):
+        """Test that empty timeline is rejected"""
+        action = json.dumps({
+            "thought": "Close incident",
+            "tool": "aws.soc.close_incident",
+            "args": {"timeline": []}
+        })
+        obs, reward, term, trunc, info = self.env.step(action)
+    
+>       self.assertIn("INVALID_PARAM", info["last_action_error"])
+E       AssertionError: 'INVALID_PARAM' not found in 'MISSING_PARAM: timeline array required'
+
+test_cloudsoc.py:297: AssertionError
+_________________ TestMemoryPressure.test_context_window_size _________________
+
+self = <test_cloudsoc.TestMemoryPressure testMethod=test_context_window_size>
+
+    def test_context_window_size(self):
+        """Test that context window respects size limit"""
+>       from inference import ContextWindow, MAX_CONTEXT_TURNS
+
+test_cloudsoc.py:368: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+    """
+    OpenEnv-CloudSOC: LLM Evaluation Loop (inference.py)
+    =====================================================
+    Hackathon-compliant inference script for evaluating LLM agents on the
+    CloudSOC benchmark environment.
+    
+    Implements:
+    - Memory Pressure Simulation (Mechanic #6): Sliding context window
+    - Chain-of-Thought Prompting (Mechanic #10): Structured JSON responses
+    - Multi-Task Shared State (Mechanic #11): Campaign continuity
+    - Hackathon stdout format: [START], [STEP], [END]
+    - Robust error handling and retry logic
+    - Adaptive temperature based on failures
+    
+    Environment Variables:
+    - API_BASE_URL: LLM API endpoint (default: Hugging Face Inference API)
+    - MODEL_NAME: Model identifier (default: Qwen/Qwen2.5-Coder-32B-Instruct)
+    - HF_TOKEN: Hugging Face API token (required for grading)
+    """
+    
+    import os
+    import sys
+    import json
+    import re
+    import time
+    import traceback
+    from typing import List, Dict, Optional, Any, Tuple
+    from dataclasses import dataclass, field
+    from enum import Enum
+    
+    from openai import OpenAI
+    
+    # Import our environment
+    from cloud_soc_env import CloudSOCEnv, CloudState, SCENARIOS
+    
+    
+    # =============================================================================
+    # CONFIGURATION
+    # =============================================================================
+    
+    # Environment variables with defaults
+    # Using Hugging Face's new router.huggingface.co endpoint (drop-in replacement for old API)
+    API_BASE_URL = os.getenv("API_BASE_URL", "https://router.huggingface.co/v1")
+    MODEL_NAME = os.getenv("MODEL_NAME", "Qwen/Qwen2.5-Coder-32B-Instruct")
+    HF_TOKEN = os.getenv("HF_TOKEN")
+    
+    # Validate HF_TOKEN is provided (required per hackathon guidelines)
+    if HF_TOKEN is None:
+>       raise ValueError(
+            "HF_TOKEN environment variable is required.\n"
+            "To set it:\n"
+            "  1. Get your HF token: https://huggingface.co/settings/tokens\n"
+            "  2. In HF Space Settings \u2192 Secrets, add: HF_TOKEN=<your_token>\\n"
+            "  3. Restart the Space"
+        )
+E       ValueError: HF_TOKEN environment variable is required.
+E       To set it:
+E         1. Get your HF token: https://huggingface.co/settings/tokens
+E         2. In HF Space Settings \u2192 Secrets, add: HF_TOKEN=<your_token>
+E         3. Restart the Space
+
+inference.py:49: ValueError
+============================== warnings summary ===============================
+cloud_soc_env.py:69
+  F:\Meta Hackathon V2\cloud_soc_env.py:69: PydanticDeprecatedSince20: Support for class-based `config` is deprecated, use ConfigDict instead. Deprecated in Pydantic V2.0 to be removed in V3.0. See Pydantic V2 Migration Guide at https://errors.pydantic.dev/2.12/migration/
+    class ToolArgs(BaseModel):
+
+cloud_soc_env.py:111
+  F:\Meta Hackathon V2\cloud_soc_env.py:111: PydanticDeprecatedSince20: `min_items` is deprecated and will be removed, use `min_length` instead. Deprecated in Pydantic V2.0 to be removed in V3.0. See Pydantic V2 Migration Guide at https://errors.pydantic.dev/2.12/migration/
+    timeline: List[str] = Field(..., min_items=1, description="Ordered list of incident events")
+
+cloud_soc_env.py:132
+  F:\Meta Hackathon V2\cloud_soc_env.py:132: PydanticDeprecatedSince20: Pydantic V1 style `@validator` validators are deprecated. You should migrate to Pydantic V2 style `@field_validator` validators, see the migration guide for more details. Deprecated in Pydantic V2.0 to be removed in V3.0. See Pydantic V2 Migration Guide at https://errors.pydantic.dev/2.12/migration/
+    @validator('tool')
+
+cloud_soc_env.py:151
+  F:\Meta Hackathon V2\cloud_soc_env.py:151: PydanticDeprecatedSince20: Pydantic V1 style `@validator` validators are deprecated. You should migrate to Pydantic V2 style `@field_validator` validators, see the migration guide for more details. Deprecated in Pydantic V2.0 to be removed in V3.0. See Pydantic V2 Migration Guide at https://errors.pydantic.dev/2.12/migration/
+    @validator('thought')
+
+test_cloudsoc.py: 1152 warnings
+  F:\Meta Hackathon V2\cloud_soc_env.py:712: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+    dt = datetime.utcnow() + timedelta(hours=hours_offset)
+
+test_cloudsoc.py: 46 warnings
+  F:\Meta Hackathon V2\cloud_soc_env.py:573: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+    base_time = datetime.utcnow() - timedelta(hours=24)
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ===========================
+FAILED test_cloudsoc.py::TestToolExecution::test_cloudwatch_deep_query - Asse...
+FAILED test_cloudsoc.py::TestPreconditions::test_isolate_without_snapshot_fails
+FAILED test_cloudsoc.py::TestPreconditions::test_snapshot_then_isolate_succeeds
+FAILED test_cloudsoc.py::TestClosingIncident::test_close_incident_with_empty_timeline
+FAILED test_cloudsoc.py::TestMemoryPressure::test_context_window_size - Value...
+=========== 5 failed, 17 passed, 1 skipped, 1202 warnings in 1.03s ============

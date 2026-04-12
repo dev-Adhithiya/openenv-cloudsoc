@@ -180,11 +180,11 @@ def emit_step(step: int, action: str, reward: float, done: bool, error: Optional
     sys.stdout.flush()
 
 
-def emit_end(success: bool, steps: int, rewards: List[float]):
+def emit_end(success: bool, steps: int, score: float, rewards: List[float]):
     """Emit [END] line"""
     success_str = "true" if success else "false"
     rewards_str = ",".join(f"{r:.2f}" for r in rewards)
-    print(f"[END] success={success_str} steps={steps} rewards={rewards_str}")
+    print(f"[END] success={success_str} steps={steps} score={score:.3f} rewards={rewards_str}")
     sys.stdout.flush()
 
 
@@ -521,13 +521,24 @@ def run_episode(
         success = False
     
     finally:
-        # Always emit end
-        emit_end(success=success, steps=steps, rewards=rewards)
+        # Calculate final score (normalized to (0.1, 0.9))
+        max_possible_reward = env.max_steps * 0.25  # Rough estimate
+        final_score = sum(rewards) / max_possible_reward if max_possible_reward > 0 else 0.5
+        final_score = max(0.1, min(0.9, final_score))  # Clamp to (0.1, 0.9)
+        
+        # Emit end (always, even on error)
+        emit_end(success=success, steps=steps, score=final_score, rewards=rewards)
         
         # Get final state for campaign continuity
-        final_state = env.get_state_for_next_task()
+        try:
+            final_state = env.get_state_for_next_task()
+        except:
+            final_state = None
         
-        env.close()
+        try:
+            env.close()
+        except:
+            pass
     
     return success, steps, rewards, final_state
 
@@ -603,11 +614,17 @@ def run_single_task(
         verbose=verbose
     )
     
+    # Calculate final score (between 0.1 and 0.9)
+    max_possible = steps * 0.25 if steps > 0 else 1.0
+    final_score = sum(rewards) / max_possible if max_possible > 0 else 0.5
+    final_score = max(0.1, min(0.9, final_score))
+    
     return {
         "task": task,
         "success": success,
         "steps": steps,
         "total_reward": sum(rewards),
+        "score": final_score,
         "rewards": rewards
     }
 
